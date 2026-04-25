@@ -2,10 +2,23 @@
 <html lang="pt-br">
     <head>
         <meta charset="UTF-8">
-        <title>Site de Consignação de Veículos</title>
+        <title>Consignação de Veículos</title>
         <link rel="stylesheet" href"{{ url_for('static', filename='css/style.css')}}>
     </head>
     <body>
-        <h1>Teste</h1>
+        <h1>Veículos disponíveis</h1>
+        <a href="/cadastrar">Cadastrar novo veículo</a>
+        <a href="/agendamentos">Ver agendamentos</a>
+
+        <div class="container">
+            {% for v in veiculos %}
+            <div class="card">
+                <img src="/{{ v.imagem }}" width="200">
+                <h2>{{ v.nome }}</h2>
+                <p> R$ {{ v.preco }}</p>
+                <a href="/veiculo/{{ v.id }}">Ver detalhes</a>
+            </div>
+            {% endfor %}
+        </div>
     </body>
 </html>
