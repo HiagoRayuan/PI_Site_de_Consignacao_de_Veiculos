@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agendamentos</title>
+</head>
+<body>
+<h1>Agendamentos</h1>
+
+<a href="/">Voltar</a>
+<table border="1">
+    {% if session.get('is_admin') %}
+        <tr>
+            <th>Cliente</th>
+            <th>Email</th>
+            <th>Telefone</th>
+            <th>Veículo</th>
+            <th>Data</th>
+        </tr>
+        {% for a in agendamentos %}
+        <tr>
+            <td>{{ a.usuario.nome }}</td>
+            <td>{{ a.usuario.email }}</td>
+            <td>{{ a.usuario.telefone }}</td>
+            <td>{{ a.veiculo.nome }}</td>
+            <td>{{ a.data }}</td>
+        </tr>
+        {% endfor %}
+    {% else %}
+        <tr>
+            <th>Veículo</th>
+            <th>Data</th>
+        </tr>
+        {% for a in agendamentos %}
+        <tr>
+            <td>{{ a.veiculo.nome }}</td>
+            <td>{{ a.data }}</td>
+        </tr>
+        {% endfor %}
+    {% endif %}
+</table>
+</body>
+</html>

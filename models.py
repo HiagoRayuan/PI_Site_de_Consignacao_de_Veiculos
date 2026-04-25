@@ -2,6 +2,14 @@ from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
 
+class Usuario(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    nome = db.Column(db.String(100))
+    email = db.Column(db.String(100), unique=True)
+    senha = db.Column(db.String(200))
+    telefone = db.Column(db.String(20))
+    is_admin = db.Column(db.Boolean, default=False)
+
 class Veiculo(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nome = db.Column(db.String(100))
@@ -11,6 +19,10 @@ class Veiculo(db.Model):
 
 class Agendamento(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    nome_cliente = db.Column(db.String(100))
     data = db.Column(db.String(50))
+
+    usuario_id = db.Column(db.Integer, db.ForeignKey('usuario.id'))
     veiculo_id = db.Column(db.Integer, db.ForeignKey('veiculo.id'))
+
+    usuario = db.relationship('Usuario')
+    veiculo = db.relationship('Veiculo')

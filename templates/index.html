@@ -7,8 +7,15 @@
     </head>
     <body>
         <h1>Veículos disponíveis</h1>
+        {% if session.get('is_admin') %}
         <a href="/cadastrar">Cadastrar novo veículo</a>
+        {% endif %}
         <a href="/agendamentos">Ver agendamentos</a>
+        {% if session.get('usuario_id') %}
+        <a href="/logout">Logout</a>
+        {% else %}
+            <a href="/login">Login</a>
+        {% endif %}
 
         <div class="container">
             {% for v in veiculos %}

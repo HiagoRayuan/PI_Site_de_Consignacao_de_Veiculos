@@ -1,7 +1,8 @@
-from flask import Flask, render_template, request, redirect
-from models import db, Veiculo, Agendamento
+from flask import Flask, render_template, request, redirect, session
+from models import db, Veiculo, Agendamento, Usuario
 
 app = Flask(__name__)
+app.secret_key = '123456'
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 app.config['UPLOAD_FOLDER'] = 'static/uploads'
@@ -11,18 +12,76 @@ db.init_app(app)
 with app.app_context():
     db.create_all()
 
+    admin = Usuario.query.filter_by(email='admin@email.com').first()
+
+    if not admin:
+        admin = Usuario(
+            nome='Administrador',
+            email='admin@email.com',
+            telefone='999999999',
+            senha='123',
+            is_admin=True
+        )
+
+        db.session.add(admin)
+        db.session.commit()
+
 @app.route('/')
 def home():
     veiculos = Veiculo.query.all()
     return render_template('index.html', veiculos=veiculos)
 
+@app.route('/registro', methods=['GET', 'POST'])
+def registro():
+    if request.method == 'POST':
+        nome = request.form['nome']
+        email = request.form['email']
+        telefone = request.form['telefone']
+        senha = request.form['senha']
+
+        usuario = Usuario(nome=nome, email=email, telefone=telefone, senha=senha)
+    
+        db.session.add(usuario)
+        db.session.commit()
+
+        return redirect('/login')
+    
+    return render_template('registro.html')
+
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        email = request.form['email']
+        senha = request.form['senha']
+
+        usuario = Usuario.query.filter_by(email=email, senha=senha).first()
+
+        if usuario:
+            session['usuario_id'] = usuario.id
+            session['is_admin'] = usuario.is_admin
+            return redirect('/')
+        
+    return render_template('login.html')
+    
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect('/')
+
+
+
 @app.route('/cadastrar', methods=['GET', 'POST'])
 def cadastrar():
-    if request.methods == 'POST':
+    
+    if not session.get('is_admin'):
+        return "Acesso negado"
+    
+    if request.method == 'POST':
         nome = request.form['nome']
         descricao = request.form['descricao']
         preco = request.form['preco']
-        imagem = request.form['imagem']
+        imagem = request.files['imagem']
 
         caminho = f"static/uploads/{imagem.filename}"
         imagem.save(caminho)
@@ -31,7 +90,7 @@ def cadastrar():
             nome = nome,
             descricao = descricao,
             preco = preco,
-            imagem = imagem
+            imagem = caminho
         )
 
         db.session.add(novo)
@@ -43,14 +102,17 @@ def cadastrar():
 
 @app.route('/veiculo/<int:id>', methods=['GET', 'POST'])
 def veiculo(id):
+
+    if not session.get('usuario_id'):
+        return redirect('/login')
+
     veiculo = Veiculo.query.get(id)
 
     if request.method == 'POST':
-        nome_cliente = request.form['nome']
         data = request.form['data']
 
         agendamento = Agendamento(
-            nome_cliente=nome_cliente,
+            usuario_id=session['usuario_id'],
             data=data,
             veiculo_id=id
         )
@@ -65,5 +127,15 @@ def veiculo(id):
 
 @app.route('/agendamentos')
 def agendamentos():
-    agendamentos = Agendamento.query.all()
+    if not session.get('usuario_id'):
+        return redirect('/login')
+    
+    if session.get('is_admin'):
+        agendamentos = Agendamento.query.all()
+    else:
+        agendamentos = Agendamento.query.filter_by(usuario_id=session['usuario_id']).all()
+
     return render_template('agendamentos.html', agendamentos=agendamentos)
+
+if __name__ == '__main__':
+    app.run(debug=True)
