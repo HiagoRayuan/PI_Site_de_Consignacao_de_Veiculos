@@ -24,7 +24,7 @@
             <td>{{ a.usuario.email }}</td>
             <td>{{ a.usuario.telefone }}</td>
             <td>{{ a.veiculo.nome }}</td>
-            <td>{{ a.data }}</td>
+            <td>{{ a.data | formatar_data }}</td>
         </tr>
         {% endfor %}
     {% else %}

@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, redirect, session
 from models import db, Veiculo, Agendamento, Usuario
+from datetime import datetime
 
 app = Flask(__name__)
 app.secret_key = '123456'
@@ -26,10 +27,22 @@ with app.app_context():
         db.session.add(admin)
         db.session.commit()
 
+@app.template_filter('moeda')
+def moeda(valor):
+    return f"R$ {valor:,.2f}".replace(",","X").replace(".",",").replace("X",".")
+
+@app.template_filter('formatar_data')
+def formatar_data(data):
+    data_obj = datetime.strptime(data, '%Y-%m-%d')
+    return data_obj.strftime('%d%m%Y')
+
 @app.route('/')
 def home():
+    usuario = None
+    if session.get('usuario_id'):
+        usuario = Usuario.query.get(session['usuario_id'])
     veiculos = Veiculo.query.all()
-    return render_template('index.html', veiculos=veiculos)
+    return render_template('index.html', veiculos=veiculos, usuario=usuario)
 
 @app.route('/registro', methods=['GET', 'POST'])
 def registro():

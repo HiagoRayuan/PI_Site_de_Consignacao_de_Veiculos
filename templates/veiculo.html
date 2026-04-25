@@ -12,7 +12,7 @@
         <img src="/{{ veiculo.imagem }}" width="300">
 
         <p>{{ veiculo.descricao }}</p>
-        <h2> R$ {{ veiculo.preco }}</h2>
+        <h2>{{ veiculo.preco | moeda }}</h2>
 
         <hr>
 

@@ -6,7 +6,9 @@
         <link rel="stylesheet" href"{{ url_for('static', filename='css/style.css')}}>
     </head>
     <body>
-        <h1>Veículos disponíveis</h1>
+        {% if usuario %}
+        <p>Olá, {{ usuario.nome }}</p>
+        {% endif %}
         {% if session.get('is_admin') %}
         <a href="/cadastrar">Cadastrar novo veículo</a>
         {% endif %}
@@ -17,12 +19,16 @@
             <a href="/login">Login</a>
         {% endif %}
 
+        <br><br>
+
+        <h1>Veículos disponíveis</h1>
+        <br>
         <div class="container">
             {% for v in veiculos %}
             <div class="card">
                 <img src="/{{ v.imagem }}" width="200">
                 <h2>{{ v.nome }}</h2>
-                <p> R$ {{ v.preco }}</p>
+                <p>{{ v.preco | moeda }}</p>
                 <a href="/veiculo/{{ v.id }}">Ver detalhes</a>
             </div>
             {% endfor %}
