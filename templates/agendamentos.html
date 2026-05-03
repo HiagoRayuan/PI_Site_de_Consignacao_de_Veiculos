@@ -6,39 +6,20 @@
     <title>Agendamentos</title>
 </head>
 <body>
-<h1>Agendamentos</h1>
-
-<a href="/">Voltar</a>
-<table border="1">
-    {% if session.get('is_admin') %}
-        <tr>
-            <th>Cliente</th>
-            <th>Email</th>
-            <th>Telefone</th>
-            <th>Veículo</th>
-            <th>Data</th>
-        </tr>
-        {% for a in agendamentos %}
-        <tr>
-            <td>{{ a.usuario.nome }}</td>
-            <td>{{ a.usuario.email }}</td>
-            <td>{{ a.usuario.telefone }}</td>
-            <td>{{ a.veiculo.nome }}</td>
-            <td>{{ a.data | formatar_data }}</td>
-        </tr>
-        {% endfor %}
-    {% else %}
-        <tr>
-            <th>Veículo</th>
-            <th>Data</th>
-        </tr>
-        {% for a in agendamentos %}
-        <tr>
-            <td>{{ a.veiculo.nome }}</td>
-            <td>{{ a.data }}</td>
-        </tr>
-        {% endfor %}
-    {% endif %}
-</table>
+    {% extends 'base.html' %}
+    {% block content %}
+        <h1 style="margin-bottom: 20px;">Meus Agendamentos</h1>
+        <div class="cards">
+            {% for a in agendamentos %}
+                <div class="card">
+                    <div class="card-body">
+                        <h3>{{ a.veiculo.nome }}</h3>
+                        <p><strong>Data:</strong> {{ a.data | formatar_data }}</p>
+                        <p><strong>Preço:</strong> {{a.veiculo.preco | moeda }}</p>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% endblock %}
 </body>
 </html>

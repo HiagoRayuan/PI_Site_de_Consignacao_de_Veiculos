@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Admin</title>
+</head>
+<body>
+    {% extends 'base.html' %}
+    {% block content %}
+        <h1>Painel Administrativo</h1>
+        <div class="cards">
+            <div class="card">
+                <div class="card-body">
+                    <h3>Veículos</h3>
+                    <p>{{ veiculos }}</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-body">
+                    <h3>Agendamentos</h3>
+                    <p>{{ agendamentos }}</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-body">
+                    <h3>Usuários</h3>
+                    <p>{{ usuarios }}</p>
+                </div>
+            </div>
+        </div>
+        <a href="/admin/veiculos" class="btn-card">Gerenciar veículos</a>
+        <a href="/agendamentos" class="btn-card">Ver agendamentos</a>
+    {% endblock %}
+</body>
+</html>

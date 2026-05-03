@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciar Veículos</title>
+</head>
+<body>
+    {% extends 'base.html' %}
+    {% block content %}
+
+        <h1>Gerenciar Veículos</h1>
+        <table border="1" cellpadding="10">
+            <tr>
+                <th>Nome</th>
+                <th>Preço</th>
+                <th>Ações</th>
+            </tr>
+            {% for v in veiculos %}
+                <tr>
+                    <td>{{ v.nome }}</td>
+                    <td>{{ v.preco | moeda }}</td>
+                    <td>
+                        <form action="/admin/excluir/{{ v.id }}" method="POST" style="display:inline;">
+                            <button onclick="return confirm('Tem certeza que deseja excluir?')">
+                                Excluir
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% endblock %}
+</body>
+</html>

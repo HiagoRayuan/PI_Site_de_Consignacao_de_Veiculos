@@ -1,6 +1,7 @@
-from flask import Flask, render_template, request, redirect, session
-from models import db, Veiculo, Agendamento, Usuario
+from flask import Flask, render_template, request, redirect, session, flash
+from models import db, Veiculo, Agendamento, Usuario, Foto
 from datetime import datetime
+from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
 app.secret_key = '123456'
@@ -20,7 +21,7 @@ with app.app_context():
             nome='Administrador',
             email='admin@email.com',
             telefone='999999999',
-            senha='123',
+            senha=generate_password_hash('123'),
             is_admin=True
         )
 
@@ -34,7 +35,7 @@ def moeda(valor):
 @app.template_filter('formatar_data')
 def formatar_data(data):
     data_obj = datetime.strptime(data, '%Y-%m-%d')
-    return data_obj.strftime('%d%m%Y')
+    return data_obj.strftime('%d/%m/%Y')
 
 @app.route('/')
 def home():
@@ -51,12 +52,28 @@ def registro():
         email = request.form['email']
         telefone = request.form['telefone']
         senha = request.form['senha']
+        senha_hash = generate_password_hash(senha)
+        confirmar_senha = request.form['confirmar_senha']
 
-        usuario = Usuario(nome=nome, email=email, telefone=telefone, senha=senha)
+        #Validação
+        if senha != confirmar_senha:
+            flash('As senhas não coincidem', 'erro')
+            return redirect('/registro')
+
+        #Email já existe
+        usuario_existente = Usuario.query.filter_by(email=email).first()
+        if usuario_existente:
+            flash('Email já cadastrado', 'erro')
+            return redirect('/registro')
+        
+        senha_hash = generate_password_hash(senha)
+
+        usuario = Usuario(nome=nome, email=email, telefone=telefone, senha=senha_hash)
     
         db.session.add(usuario)
         db.session.commit()
 
+        flash('Cadastro realizado com sucesso!', 'sucesso')
         return redirect('/login')
     
     return render_template('registro.html')
@@ -68,12 +85,14 @@ def login():
         email = request.form['email']
         senha = request.form['senha']
 
-        usuario = Usuario.query.filter_by(email=email, senha=senha).first()
+        usuario = Usuario.query.filter_by(email=email).first()
 
-        if usuario:
+        if usuario and check_password_hash(usuario.senha, senha):
             session['usuario_id'] = usuario.id
             session['is_admin'] = usuario.is_admin
             return redirect('/')
+        else:
+            flash('Email ou senha incorretos', 'erro')
         
     return render_template('login.html')
     
@@ -82,7 +101,41 @@ def logout():
     session.clear()
     return redirect('/')
 
+@app.route('/admin')
+def admin():
+    if not session.get('is_admin'):
+        return redirect('/')
+    
+    total_veiculos = Veiculo.query.count()
+    total_agendamentos = Agendamento.query.count()
+    total_usuarios = Usuario.query.count()
 
+    return render_template(
+        'admin/dashboard.html',
+        veiculos = total_veiculos,
+        agendamentos = total_agendamentos,
+        usuarios = total_usuarios
+    )
+
+@app.route('/admin/veiculos')
+def admin_veiculos():
+    if not session.get('is_admin'):
+        return redirect('/')
+    
+    veiculos = Veiculo.query.all()
+    return render_template('admin/veiculos.html', veiculos=veiculos)
+
+@app.route('/admin/excluir/<int:id>', methods=['POST'])
+def excluir_veiculo(id):
+    if not session.get('is_admin'):
+        return redirect('/')
+    
+    veiculo = Veiculo.query.get(id)
+
+    db.session.delete(veiculo)
+    db.session.commit()
+
+    return redirect('/admin/veiculos')
 
 @app.route('/cadastrar', methods=['GET', 'POST'])
 def cadastrar():
@@ -94,22 +147,40 @@ def cadastrar():
         nome = request.form['nome']
         descricao = request.form['descricao']
         preco = request.form['preco']
-        imagem = request.files['imagem']
 
-        caminho = f"static/uploads/{imagem.filename}"
-        imagem.save(caminho)
+        imagem_principal = request.files['imagem']
+        caminho_principal = f"static/uploads/{imagem_principal.filename}"
+        imagem_principal.save(caminho_principal)
 
         novo = Veiculo(
             nome = nome,
             descricao = descricao,
             preco = preco,
-            imagem = caminho
+            imagem = caminho_principal
         )
 
         db.session.add(novo)
         db.session.commit()
 
-        return redirect('/')
+        #Salvar imagens extras
+        imagens = request.files.getlist('imagens')
+
+        for img in imagens:
+            if img.filename != "":
+                import uuid
+                nome_arquivo = f"{uuid.uuid4()}_{img.filename}"
+                caminho = f"static/uploads/{nome_arquivo}"
+                img.save(caminho)
+
+                foto = Foto(
+                    caminho = caminho,
+                    veiculo_id = novo.id
+                )
+                db.session.add(foto)
+        db.session.commit()
+
+        flash('Veículo cadastrado com sucesso!', 'sucesso')
+        return redirect('/admin/veiculos')
     
     return render_template('cadastrar_veiculo.html')
 
@@ -122,7 +193,7 @@ def veiculo(id):
     veiculo = Veiculo.query.get(id)
 
     if request.method == 'POST':
-        data = request.form['data']
+        data = datetime.strptime(request.form['data'], '%Y-%m-%d')
 
         agendamento = Agendamento(
             usuario_id=session['usuario_id'],

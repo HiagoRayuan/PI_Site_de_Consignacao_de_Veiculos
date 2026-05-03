@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Meu site{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="nav-left">
+            Consignação Veículos
+        </div>
+        <div class="nav-center">
+            <a href="/">Home</a>
+            {% if session.get('usuario_id') %}
+                <a href="/agendamentos">Agendamentos</a>
+            {% endif %}
+
+            {% if session.get('is_admin') %}
+                <a href="/cadastrar">Cadastrar Veículo</a>
+                <a href="/admin">Painel Admin</a>
+            {% endif %}
+        </div>
+        <div class="nav-right">
+            {% if session.get('usuario_id') %}  
+                <a href="/logout" class="btn-nav">Logout</a>
+            {% else %}
+                <a href="/login" class="btn-nav">Login</a>
+            {% endif %}
+        </div>
+    </nav>
+
+    <!-- Conteúdo -->
+     <div class="container">
+        {% with mensagens = get_flashed_messages(with_categories=true) %}
+            {% if mensagens %}
+                {% for categoria, msg in mensagens %}
+                    <div class="alert {{ categoria }}">
+                        {{ msg }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        {% block content %}{% endblock %}
+     </div>
+</body>
+</html>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const telefone = document.getElementById("telefone");
+
+        if (telefone) {
+            telefone.addEventListener("input", function (e) {
+                let valor = e.target.value.replace(/\D/g, "");
+
+                if (valor.length > 11) valor = valor.slice(0, 11);
+
+                if (valor.length > 6) {
+                    valor = valor.replace(/^(\d{2})(\d{5})(\d{0,4})$/, "($1) $2-$3");
+                } else if (valor.length > 2){
+                    valor = valor.replace(/^(\d{2})(\d{0,5})$/, "($1) $2");
+                } else {
+                    valor = valor.replace(/^(\d*)$/, "($1");
+                }
+
+                e.target.value = valor;
+            });
+        }
+    });
+
+    function toggleSenha(id) {
+        const input = document.getElementById(id);
+        const icon = input.nextElementSibling;
+
+        if(input.type === "password") {
+            input.type = "text";
+            icon.style.opacity = "1";
+        } else {
+            input.type = "password";
+            icon.style.opacity = "0.5";
+        }
+    }
+</script>

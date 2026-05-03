@@ -17,6 +17,13 @@ class Veiculo(db.Model):
     preco = db.Column(db.Float)
     imagem = db.Column(db.String(200))
 
+class Foto(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    caminho = db.Column(db.String(200))
+    
+    veiculo_id = db.Column(db.Integer, db.ForeignKey('veiculo.id'))
+    veiculo = db.relationship('Veiculo', backref='fotos')
+
 class Agendamento(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     data = db.Column(db.String(50))

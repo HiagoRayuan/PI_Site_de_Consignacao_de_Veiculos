@@ -1,22 +1,164 @@
 body{
-    font-family: Arial, sans-serif;
-    background-color: #f4f4f4;
-    text-align: center;
-    margin-top: 50px;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background-color: #f1f2f6;
+    margin: 0;
 }
 h1 {
     color: #333;
 }
+.navbar {
+    background: #2f3640;
+    color: white;
+    padding: 15px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.nav-left {
+    flex: 1;
+    font-weight: 500;
+    font-size: large;
+}
+.nav-center {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    gap: 25px;
+}
+.nav-right {
+    flex: 1;
+    display: flex;
+    justify-content: flex-end;
+    font-weight: 500;
+}
+.nav-center a {
+    text-decoration: none;
+    color: white;
+    font-weight: 500;
+}
+.btn-nav {
+    background: #0984e3;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 6px;
+    text-decoration: none;
+}
+.btn-nav:hover {
+    background: #74b9ff;
+}
 .container {
+    padding: 30px;
+}
+.cards {
     display: flex;
     flex-wrap: wrap;
-    justify-content: center;
+    gap: 20px;
 }
 .card {
     background: white;
-    margin: 15px;
-    padding: 15px;
+    width: 250px;
     border-radius: 10px;
-    width: 220px;
+    overflow: hidden;
     box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    transition: 0.3s;
+}
+.card:hover {
+    transform: scale(1.03);
+}
+.card img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+}
+.card-body {
+    padding: 15px;
+}
+.preco {
+    color: green;
+    font-size: 18px;
+    font-weight: bold;
+}
+.form-container {
+    max-width: 400px;
+    margin: 50px auto;
+    background: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.1);
+}
+.form-container h1 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+.form-group {
+    margin-bottom: 15px;
+}
+.form-group input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    outline: none;
+    transition: 0.2s;
+}
+.form-group input:focus {
+    border-color: #0984e3;
+}
+.form-group textarea {
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    resize: none;
+    height: 100px;
+}
+input[type="file"] {
+    border: 1px dashed #ccc;
+    padding: 10px;
+    border-radius: 8px;
+    background: #fafafa;
+}
+.btn {
+    width: 100%;
+    padding: 12px;
+    background: #0984e3;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+}
+.btn:hover {
+    background: #74b9ff;
+}
+.link {
+    text-align: center;
+    margin-top: 10px;
+}
+.senha-box {
+    position: relative;
+}
+.eye {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    cursor: pointer;
+    opacity: 0.5;
+    transition: 0.2s;
+}
+.eye:hover {
+    opacity: 1;
+}
+.alert {
+    padding: 12px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    color: white;
+    font-weight: bold;
+}
+.alert.erro {
+    background: #e74c3c;
+}
+.alert.sucesso {
+    background: #2ecc71;
 }

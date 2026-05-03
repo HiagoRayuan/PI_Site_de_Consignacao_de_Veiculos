@@ -6,32 +6,24 @@
         <link rel="stylesheet" href"{{ url_for('static', filename='css/style.css')}}>
     </head>
     <body>
-        {% if usuario %}
-        <p>Olá, {{ usuario.nome }}</p>
-        {% endif %}
-        {% if session.get('is_admin') %}
-        <a href="/cadastrar">Cadastrar novo veículo</a>
-        {% endif %}
-        <a href="/agendamentos">Ver agendamentos</a>
-        {% if session.get('usuario_id') %}
-        <a href="/logout">Logout</a>
-        {% else %}
-            <a href="/login">Login</a>
-        {% endif %}
-
-        <br><br>
+        {% extends 'base.html' %}
+        {% block title %}Veículos{% endblock %}
+        {% block content %}
 
         <h1>Veículos disponíveis</h1>
-        <br>
-        <div class="container">
+
+        <div class="cards">
             {% for v in veiculos %}
             <div class="card">
-                <img src="/{{ v.imagem }}" width="200">
-                <h2>{{ v.nome }}</h2>
-                <p>{{ v.preco | moeda }}</p>
-                <a href="/veiculo/{{ v.id }}">Ver detalhes</a>
+                <img src="/{{ v.imagem }}">
+                <div class="card-body">
+                    <h3>{{ v.nome }}</h3>
+                    <p class="preco"> {{ v.preco | moeda }}</p>
+                    <a href="/veiculo/{{ v.id }}">Ver detalhes</a>
+                </div>
             </div>
             {% endfor %}
         </div>
+        {% endblock %}
     </body>
 </html>

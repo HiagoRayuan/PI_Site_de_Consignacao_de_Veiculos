@@ -5,22 +5,31 @@
         <title>{{ veiculo.nome }}</title>
     </head>
     <body>
-        <a href="/"> Voltar </a>
-        
-        <h1>{{ veiculo.nome }}</h1>
+        {% extends 'base.html' %}
+        {% block content %}
 
-        <img src="/{{ veiculo.imagem }}" width="300">
+            <h1>{{ veiculo.nome }}</h1>
 
-        <p>{{ veiculo.descricao }}</p>
-        <h2>{{ veiculo.preco | moeda }}</h2>
+            <img src="/{{ veiculo.imagem }}" width="400">
 
-        <hr>
+            <p>{{ veiculo.descricao }}</p>
+            <h2 class="preco">{{ veiculo.preco | moeda }}</h2>
 
-        <h2>Agendar visita</h2>
+            <hr>
+            <h3>Mais fotos</h3>
 
-        <form method="POST">
-            <input type="date" name="data" required><br><br>
-            <button type="submit">Agendar</button>
-        </form>
+            <div>
+                {% for foto in veiculo.fotos %}
+                    <img src="/{{ foto.caminho }}" width="150">
+                {% endfor %}
+            </div>
+            <hr>
+            <h2>Agendar visita</h2>
+
+            <form method="POST">
+                <input type="date" name="data" required><br><br>
+                <button type="submit">Agendar</button>
+            </form>
+        {% endblock %}
     </body>
 </html>

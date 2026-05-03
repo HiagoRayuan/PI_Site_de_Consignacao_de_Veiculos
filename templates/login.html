@@ -6,14 +6,33 @@
     <title>Login</title>
 </head>
 <body>
-    <form method="POST">
-        <input type="email" name="email" placeholder="Email" required><br>
-        <input type="password" name="senha" placeholder="Senha" required><br>
+    {% extends 'base.html' %}
+    {% block title %}Login{% endblock %}
+    {% block content %}
 
-        <button type="submit">Entrar</button>
-    </form>
+        <div class="form-container">
+            <h1>Login</h1>
+            
+            <form method="POST">
+                <div class="form-group">
+                    <input type="email" name="email" placeholder="Seu email" required>
+                </div>
+                <div class="form-group senha-box">
+                    <input type="password" id="senha" name="senha" placeholder="Senha" required>
+                    <span onclick="toggleSenha('senha')" class="eye">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" width="20">
+                            <path d="M1 12s4-6 11-6 11 6 11 6-4 6-11 6-11-6-11-6z"/>
+                            <circle cx="12" cy="12" r="3"/>
+                        </svg>
+                    </span>
+                </div>
 
-    <p>Ainda não tem conta? <a href="/registro">Cadastre-se</a></p>
-    
+                <button type="submit" class="btn">Entrar</button>
+            </form>
+            <div class="link">
+                <p>Não tem conta?<a href="/registro">Cadastre-se</a></p>
+            </div>
+        </div>
+    {% endblock %}
 </body>
 </html>
