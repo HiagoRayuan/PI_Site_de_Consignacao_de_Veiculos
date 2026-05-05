@@ -70,6 +70,10 @@
         }
     });
 
+    function trocarImagem(elemento) {
+        document.getElementById("imagem-principal").src = elemento.src;
+    }
+
     function toggleSenha(id) {
         const input = document.getElementById(id);
         const icon = input.nextElementSibling;

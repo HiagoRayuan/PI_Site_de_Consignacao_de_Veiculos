@@ -162,3 +162,50 @@ input[type="file"] {
 .alert.sucesso {
     background: #2ecc71;
 }
+.veiculo-container {
+    display: flex;
+    gap: 40px;
+    margin-top: 30px;
+}
+.galeria {
+    width: 60%;
+}
+.imagem-principal {
+    width: 100%;
+    border-radius: 12px;
+    margin-bottom: 10px;
+}
+.miniaturas {
+    display: flex;
+    gap: 10px;
+}
+.miniaturas img {
+    width: 80px;
+    cursor: pointer;
+    border-radius: 6px;
+    opacity: 0.7;
+    transition: 0.3s;
+}
+.miniaturas img:hover {
+    opacity: 1;
+    transform: scale(1.05);
+}
+.info {
+    width: 40%;
+}
+.preco {
+    font-size: 28px;
+    color: #2ecc71;
+    font-weight: bold;
+    margin: 10px 0;
+}
+.descricao {
+    margin-top: 15px;
+    line-height: 1.5;
+}
+.form-agendamento {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
