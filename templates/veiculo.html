@@ -1,25 +1,24 @@
+{% extends 'base.html' %}
+{% block content %}
 <!DOCTYPE html>
-<html lang="pt-br">
-    <head>
-        <meta charset="UTF-8">
-        <title>{{ veiculo.nome }}</title>
-    </head>
-    <body>
-        {% extends 'base.html' %}
-        {% block content %}
-
+    <html lang="pt-br">
+        <head>
+            <meta charset="UTF-8">
+            <title>{{ veiculo.nome }}</title>
+        </head>
+        <body>
             <div class="veiculo-container">
                 <!--Galeria-->
                 <div class="galeria">
                     <!--Imagem Principal-->
                     <img id="imagem-principal" src="/{{ veiculo.imagem }}" class="imagem-principal">
                     <!--Miniaturas-->
-                     <div class="miniaturas">
+                    <div class="miniaturas">
                         <img src="/{{ veiculo.imagem }}" onclick="trocarImagem(this)">
                         {% for foto in veiculo.fotos %}
                             <img src="/{{ foto.caminho }}" onclick="trocarImagem(this)">
                         {% endfor %}
-                     </div>
+                    </div>
                 </div>
                 <!--Info-->
                 <div class="info">
@@ -35,7 +34,7 @@
                         <button class="btn">Agendar visita</button>
                     </form>
                 </div>
-            </div>
-        {% endblock %}
-    </body>
-</html>
+            </div>    
+        </body>
+    </html>
+{% endblock %}

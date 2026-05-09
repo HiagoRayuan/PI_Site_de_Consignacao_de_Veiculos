@@ -1,29 +1,28 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-    <head>
-        <meta charset="UTF-8">
-        <title>Consignação de Veículos</title>
-        <link rel="stylesheet" href"{{ url_for('static', filename='css/style.css')}}>
-    </head>
-    <body>
-        {% extends 'base.html' %}
-        {% block title %}Veículos{% endblock %}
-        {% block content %}
+{% extends 'base.html' %}
+{% block content %}
+    <!DOCTYPE html>
+    <html lang="pt-br">
+        <head>
+            <meta charset="UTF-8">
+            <title>Consignação de Veículos</title>
+            <link rel="stylesheet" href"{{ url_for('static', filename='css/style.css')}}>
+        </head>
+        <body>           
+            {% block title %}Veículos{% endblock %}
 
-        <h1>Veículos disponíveis</h1>
-
-        <div class="cards">
-            {% for v in veiculos %}
-            <div class="card">
-                <img src="/{{ v.imagem }}">
-                <div class="card-body">
-                    <h3>{{ v.nome }}</h3>
-                    <p class="preco"> {{ v.preco | moeda }}</p>
-                    <a href="/veiculo/{{ v.id }}">Ver detalhes</a>
+            <h1>Veículos disponíveis</h1>
+            <div class="cards">
+                {% for v in veiculos %}
+                <div class="card">
+                    <img src="/{{ v.imagem }}">
+                    <div class="card-body">
+                        <h3>{{ v.nome }}</h3>
+                        <p class="preco"> {{ v.preco | moeda }}</p>
+                        <a href="/veiculo/{{ v.id }}">Ver detalhes</a>
+                    </div>
                 </div>
+                {% endfor %}
             </div>
-            {% endfor %}
-        </div>
-        {% endblock %}
-    </body>
-</html>
+        </body>
+    </html>
+{% endblock %}

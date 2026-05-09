@@ -1,13 +1,14 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Agendamentos</title>
-</head>
-<body>
-    {% extends 'base.html' %}
-    {% block content %}
+{% extends 'base.html' %}
+{% block content %}
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Agendamentos</title>
+    </head>
+    <body>
+        
         <h1 style="margin-bottom: 20px;">Meus Agendamentos</h1>
         <div class="cards">
             {% for a in agendamentos %}
@@ -20,6 +21,7 @@
                 </div>
             {% endfor %}
         </div>
-    {% endblock %}
-</body>
-</html>
+        
+    </body>
+    </html>
+{% endblock %}

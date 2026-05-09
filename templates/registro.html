@@ -1,15 +1,14 @@
+{% extends 'base.html' %}
+{% block content %}
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cadastro de Usuário</title>
-</head>
-<body>
-    {% extends 'base.html' %}
-    {% block title %}Cadastro{% endblock %}
-    {% block content %}
-
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Cadastro de Usuário</title>
+    </head>
+    <body>
+        {% block title %}Cadastro{% endblock %}
         <div class="form-container">
             <h1>Criar conta</h1>
             <form method="POST">
@@ -46,7 +45,6 @@
                 <p>Já tem conta? <a href="/login">Entrar</a></p>
             </div>
         </div>    
-    
-    {% endblock %}
-</body>
+    </body>
 </html>
+{% endblock %}
