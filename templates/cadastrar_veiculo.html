@@ -7,7 +7,7 @@
         </head>
         <body>
 
-            <div class="form-container">
+            <div class="form-container" style="max-width: 500px;">
                 <h1>Cadastrar Veículo</h1>
 
                 <form method="POST" enctype="multipart/form-data">
@@ -18,17 +18,18 @@
                         <textarea name="descricao" placeholder="Descrição" required></textarea>
                     </div>
                     <div class="form-group">
-                        <input type="number" step="0.01" name="preco" placeholder="Preço" required>
+                        <input type="number" step="0.01" name="preco" placeholder="Preço (R$)" required>
                     </div>
-                    <div class="form-group">
-                        <label>Foto principal do Anúncio</label>
-                        <input type="file" name="imagem" required>
+                    <div class="form-group upload-group">
+                        <label class="upload-label">Foto principal do anúncio
+                        </label>
+                        <input type="file" name="imagem" accept="image/*" required>
                     </div>
-                    <div class="form-group">
-                        <label>Fotos adicionais</label>
-                        <input type="file" name="imagens" multiple required>
+                    <div class="form-group upload-group">
+                        <label class="upload-label">Fotos adicionais</label>
+                        <input type="file" name="imagens" accept="image/*" multiple required>
                     </div>
-                    <button class="btn">Cadastrar</button>
+                    <button class="btn btn-center">Cadastrar</button>
                 </form>
             </div>    
         </body>
