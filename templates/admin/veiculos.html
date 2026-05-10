@@ -19,6 +19,7 @@
                     <div class="card-actions">
                         <a href="/veiculo/{{ v.id }}" class="btn-secondary">Ver detalhes</a>
                         <form action="/admin/excluir/{{ v.id }}" method="POST">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                             <button onclick="return confirm('Tem certeza que deseja excluir')" class="btn-danger">Excluir</button>
                         </form>
                     </div>

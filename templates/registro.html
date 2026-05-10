@@ -11,6 +11,7 @@
         <div class="form-container">
             <h1>Criar conta</h1>
             <form method="POST">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <div class="form-group">
                     <input type="text" name="nome" placeholder="Nome completo" required>
                 </div>

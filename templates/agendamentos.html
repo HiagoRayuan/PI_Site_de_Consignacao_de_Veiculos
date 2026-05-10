@@ -28,10 +28,12 @@
                             <a href="/agendamentos/editar/{{ a.id }}" class="btn-secondary">Alterar data</a>
 
                             <form action="/agendamentos/excluir/{{ a.id }}" method="POST">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                 <button onclick="return confirm('Deseja excluir este agendamento?')" class="btn-danger">Excluir</button>
                             </form>
                         {% else %}
                             <form action="/admin/agendamentos/excluir/{{ a.id }}" method="POST">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                                 <button onclick="return confirm('Deseja excluir este agendamento?')" class="btn-danger">Excluir</button>
                             </form>
                         {% endif %}

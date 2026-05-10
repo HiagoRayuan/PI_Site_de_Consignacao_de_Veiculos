@@ -29,6 +29,7 @@
 
                     <!--Form Agendamento-->
                     <form method="POST" class="form-agendamento">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <label>Escolha uma data:</label>
                         <input type="date" name="data" required>
                         <button class="btn">Agendar visita</button>

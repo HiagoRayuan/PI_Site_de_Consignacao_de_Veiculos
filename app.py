@@ -2,20 +2,41 @@ from flask import Flask, render_template, request, redirect, session, flash
 from models import db, Veiculo, Agendamento, Usuario, Foto
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask_wtf.csrf import CSRFProtect
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
+from dotenv import load_dotenv
+import os
 import uuid
 
-app = Flask(__name__)
-app.secret_key = '123456'
+load_dotenv()
 
+app = Flask(__name__)
+app.secret_key = os.environ.get('SECRET_KEY')
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 app.config['UPLOAD_FOLDER'] = 'static/uploads'
+app.config['WTF_CSRF_ENABLED'] = True
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024 # Limita o upload para 16MB
+
+csrf = CSRFProtect(app)
+
+limiter = Limiter(
+    get_remote_address,
+    app=app,
+    default_limits=[]
+)
 
 db.init_app(app)
+
+EXTENSOES_PERMITIDAS = {'png', 'jpg', 'jpeg', 'webp', 'jfif'}
+def arquivo_permitido(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in EXTENSOES_PERMITIDAS
 
 with app.app_context():
     db.create_all()
 
     admin = Usuario.query.filter_by(email='admin@email.com').first()
+
     if not admin:
         admin = Usuario(
             nome='Administrador',
@@ -66,9 +87,7 @@ def registro():
             return redirect('/registro')
         
         senha_hash = generate_password_hash(senha)
-
         usuario = Usuario(nome=nome, email=email, telefone=telefone, senha=senha_hash)
-    
         db.session.add(usuario)
         db.session.commit()
 
@@ -130,29 +149,16 @@ def excluir_veiculo(id):
         return redirect('/')
     
     veiculo = db.session.get(Veiculo, id)
-
     db.session.delete(veiculo)
     db.session.commit()
 
     return redirect('/admin/veiculos')
 
-@app.route('/admin/agendamentos/excluir/<int:id>', methods=['POST'])
-def admin_excluir_agendamento(id):
-    if not session.get('is_admin'):
-        return redirect('/')
-    
-    agendamento = db.session.get(Agendamento, id)
-    db.session.delete(agendamento)
-    db.session.commit()
-
-    flash('Agendamento excluído com sucesso!', 'sucesso')
-    return redirect('/agendamentos')
-
 @app.route('/cadastrar', methods=['GET', 'POST'])
 def cadastrar():
     
     if not session.get('is_admin'):
-        return "Acesso negado"
+        return redirect('/')
     
     if request.method == 'POST':
         nome = request.form['nome']
@@ -160,6 +166,11 @@ def cadastrar():
         preco = request.form['preco']
 
         imagem_principal = request.files['imagem']
+
+        if not arquivo_permitido(imagem_principal.filename):
+            flash('Formato de imagem inválido. Use PNG, JPG ou WEBP', 'erro')
+            return redirect('/cadastrar')
+
         nome_principal = f"{uuid.uuid4()}_{imagem_principal.filename}"
         caminho_principal = f"static/uploads/{nome_principal}"
         imagem_principal.save(caminho_principal)
@@ -182,17 +193,14 @@ def cadastrar():
                 nome_arquivo = f"{uuid.uuid4()}_{img.filename}"
                 caminho = f"static/uploads/{nome_arquivo}"
                 img.save(caminho)
-
-                foto = Foto(
-                    caminho = caminho,
-                    veiculo_id = novo.id
-                )
+                foto = Foto(caminho = caminho, veiculo_id = novo.id)
                 db.session.add(foto)
         db.session.commit()
-
+        
         flash('Veículo cadastrado com sucesso!', 'sucesso')
         return redirect('/admin/veiculos')
     
+
     return render_template('cadastrar_veiculo.html')
 
 @app.route('/veiculo/<int:id>', methods=['GET', 'POST'])
@@ -201,11 +209,9 @@ def veiculo(id):
     if not session.get('usuario_id'):
         return redirect('/login')
 
-    veiculo = Veiculo.query.get(id)
+    veiculo = db.get_or_404(Veiculo, id)
 
     if request.method == 'POST':
-
-        # Verifica se já existe um agendamento para este usuário e veículo
         agendamento_existente = Agendamento.query.filter_by(
             usuario_id=session['usuario_id'],
             veiculo_id=id
@@ -216,13 +222,11 @@ def veiculo(id):
             return redirect(f'/veiculo/{id}')
         
         data = request.form['data']
-
         agendamento = Agendamento(
             usuario_id=session['usuario_id'],
             data=data,
             veiculo_id=id
         )
-
         db.session.add(agendamento)
         db.session.commit()
 
@@ -231,12 +235,24 @@ def veiculo(id):
     
     return render_template('veiculo.html', veiculo=veiculo)
 
+@app.route('/agendamentos')
+def agendamentos():
+    if not session.get('usuario_id'):
+        return redirect('/login')
+    
+    if session.get('is_admin'):
+        agendamentos = Agendamento.query.all()
+    else:
+        agendamentos = Agendamento.query.filter_by(usuario_id=session['usuario_id']).all()
+
+    return render_template('agendamentos.html', agendamentos=agendamentos)
+
 @app.route('/agendamentos/excluir/<int:id>', methods=['POST'])
 def excluir_agendamento(id):
     if not session.get('usuario_id'):
         return redirect('/login')
     
-    agendamento = db.session.get(Agendamento, id)
+    agendamento = db.get_or_404(Agendamento, id)
     # Verifica se o agendamento pertence ao usuário ou se é admin
     if agendamento.usuario_id != session['usuario_id'] and not session.get('is_admin'):
         flash('Acesso negado!', 'erro')
@@ -269,18 +285,18 @@ def editar_agendamento(id):
     
     return render_template('editar_agendamentos.html', agendamento=agendamento)
 
-
-@app.route('/agendamentos')
-def agendamentos():
-    if not session.get('usuario_id'):
-        return redirect('/login')
+@app.route('/admin/agendamentos/excluir/<int:id>', methods=['POST'])
+def admin_excluir_agendamento(id):
+    if not session.get('is_admin'):
+        return redirect('/')
     
-    if session.get('is_admin'):
-        agendamentos = Agendamento.query.all()
-    else:
-        agendamentos = Agendamento.query.filter_by(usuario_id=session['usuario_id']).all()
+    agendamento = db.session.get(Agendamento, id)
+    db.session.delete(agendamento)
+    db.session.commit()
 
-    return render_template('agendamentos.html', agendamentos=agendamentos)
+    flash('Agendamento excluído com sucesso!', 'sucesso')
+    return redirect('/agendamentos')
+
 
 if __name__ == '__main__':
     app.run(debug=True)
