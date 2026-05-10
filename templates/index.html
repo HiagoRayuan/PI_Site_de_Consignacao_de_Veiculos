@@ -5,7 +5,7 @@
         <head>
             <meta charset="UTF-8">
             <title></title>
-            <link rel="stylesheet" href"{{ url_for('static', filename='css/style.css')}}>
+            <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css')}}">
         </head>
         <body>           
             <h1>Veículos disponíveis</h1>
@@ -16,7 +16,9 @@
                     <div class="card-body">
                         <h3>{{ v.nome }}</h3>
                         <p class="preco"> {{ v.preco | moeda }}</p>
-                        <a href="/veiculo/{{ v.id }}">Ver detalhes</a>
+                        <div class="card-actions">
+                            <a href="/veiculo/{{ v.id }}" class="btn">Ver detalhes</a>
+                        </div>
                     </div>
                 </div>
                 {% endfor %}

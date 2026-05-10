@@ -13,26 +13,29 @@
             <div class="card">
                 <div class="card-body">
                     <h3>Veículos</h3>
-                    <p>{{ veiculos }}</p>
+                    <p class="preco">{{ veiculos }}</p>
                 </div>
             </div>
 
             <div class="card">
                 <div class="card-body">
                     <h3>Agendamentos</h3>
-                    <p>{{ agendamentos }}</p>
+                    <p class="preco">{{ agendamentos }}</p>
                 </div>
             </div>
 
             <div class="card">
                 <div class="card-body">
                     <h3>Usuários</h3>
-                    <p>{{ usuarios }}</p>
+                    <p class="preco">{{ usuarios }}</p>
                 </div>
             </div>
         </div>
-        <a href="/admin/veiculos" class="btn-card">Gerenciar veículos</a>
-        <a href="/agendamentos" class="btn-card">Ver agendamentos</a>
+        <div style="margin-top: 20px; display: flex; gap: 12px;">
+            <a href="/admin/veiculos" class="btn-card">Gerenciar veículos</a>
+            <a href="/agendamentos" class="btn-card">Ver agendamentos</a>
+            <a href="/cadastrar" class="btn-card">Cadastrar Veículo</a>
+        </div>
     {% endblock %}
 </body>
 </html>

@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect, session, flash
 from models import db, Veiculo, Agendamento, Usuario, Foto
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
+import uuid
 
 app = Flask(__name__)
 app.secret_key = '123456'
@@ -15,7 +16,6 @@ with app.app_context():
     db.create_all()
 
     admin = Usuario.query.filter_by(email='admin@email.com').first()
-
     if not admin:
         admin = Usuario(
             nome='Administrador',
@@ -52,7 +52,6 @@ def registro():
         email = request.form['email']
         telefone = request.form['telefone']
         senha = request.form['senha']
-        senha_hash = generate_password_hash(senha)
         confirmar_senha = request.form['confirmar_senha']
 
         #Validação
@@ -130,12 +129,24 @@ def excluir_veiculo(id):
     if not session.get('is_admin'):
         return redirect('/')
     
-    veiculo = Veiculo.query.get(id)
+    veiculo = db.session.get(Veiculo, id)
 
     db.session.delete(veiculo)
     db.session.commit()
 
     return redirect('/admin/veiculos')
+
+@app.route('/admin/agendamentos/excluir/<int:id>', methods=['POST'])
+def admin_excluir_agendamento(id):
+    if not session.get('is_admin'):
+        return redirect('/')
+    
+    agendamento = db.session.get(Agendamento, id)
+    db.session.delete(agendamento)
+    db.session.commit()
+
+    flash('Agendamento excluído com sucesso!', 'sucesso')
+    return redirect('/agendamentos')
 
 @app.route('/cadastrar', methods=['GET', 'POST'])
 def cadastrar():
@@ -149,7 +160,8 @@ def cadastrar():
         preco = request.form['preco']
 
         imagem_principal = request.files['imagem']
-        caminho_principal = f"static/uploads/{imagem_principal.filename}"
+        nome_principal = f"{uuid.uuid4()}_{imagem_principal.filename}"
+        caminho_principal = f"static/uploads/{nome_principal}"
         imagem_principal.save(caminho_principal)
 
         novo = Veiculo(
@@ -167,7 +179,6 @@ def cadastrar():
 
         for img in imagens:
             if img.filename != "":
-                import uuid
                 nome_arquivo = f"{uuid.uuid4()}_{img.filename}"
                 caminho = f"static/uploads/{nome_arquivo}"
                 img.save(caminho)
@@ -193,7 +204,18 @@ def veiculo(id):
     veiculo = Veiculo.query.get(id)
 
     if request.method == 'POST':
-        data = datetime.strptime(request.form['data'], '%Y-%m-%d')
+
+        # Verifica se já existe um agendamento para este usuário e veículo
+        agendamento_existente = Agendamento.query.filter_by(
+            usuario_id=session['usuario_id'],
+            veiculo_id=id
+        ).first()
+
+        if agendamento_existente:
+            flash('Você já possui uma visita agendada para este veículo!', 'erro')
+            return redirect(f'/veiculo/{id}')
+        
+        data = request.form['data']
 
         agendamento = Agendamento(
             usuario_id=session['usuario_id'],
@@ -204,9 +226,48 @@ def veiculo(id):
         db.session.add(agendamento)
         db.session.commit()
 
+        flash('Agendamento realizado com sucesso!', 'sucesso')
         return redirect('/')
     
     return render_template('veiculo.html', veiculo=veiculo)
+
+@app.route('/agendamentos/excluir/<int:id>', methods=['POST'])
+def excluir_agendamento(id):
+    if not session.get('usuario_id'):
+        return redirect('/login')
+    
+    agendamento = db.session.get(Agendamento, id)
+    # Verifica se o agendamento pertence ao usuário ou se é admin
+    if agendamento.usuario_id != session['usuario_id'] and not session.get('is_admin'):
+        flash('Acesso negado!', 'erro')
+        return redirect('/agendamentos')
+    
+    db.session.delete(agendamento)
+    db.session.commit()
+
+    flash('Agendamento excluído com sucesso!', 'sucesso')
+    return redirect('/agendamentos')
+
+@app.route('/agendamentos/editar/<int:id>', methods=['GET', 'POST'])
+def editar_agendamento(id):
+    if not session.get('usuario_id'):
+        return redirect('/login')
+    
+    agendamento = db.session.get(Agendamento, id)
+
+    # Verifica se o agendamento pertence ao usuário
+    if agendamento.usuario_id != session['usuario_id']:
+        flash('Acesso negado!', 'erro')
+        return redirect('/agendamentos')
+    
+    if request.method == 'POST':
+        agendamento.data = request.form['data']
+        db.session.commit()
+
+        flash('Agendamento atualizado com sucesso!', 'sucesso')
+        return redirect('/agendamentos')
+    
+    return render_template('editar_agendamentos.html', agendamento=agendamento)
 
 
 @app.route('/agendamentos')

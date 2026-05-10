@@ -9,26 +9,23 @@
     </head>
     <body>
         <h1>Gerenciar Veículos</h1>
-        <table border="1" cellpadding="10">
-            <tr>
-                <th>Nome</th>
-                <th>Preço</th>
-                <th>Ações</th>
-            </tr>
-            {% for v in veiculos %}
-                <tr>
-                    <td>{{ v.nome }}</td>
-                    <td>{{ v.preco | moeda }}</td>
-                    <td>
-                        <form action="/admin/excluir/{{ v.id }}" method="POST" style="display:inline;">
-                            <button onclick="return confirm('Tem certeza que deseja excluir?')">
-                                Excluir
-                            </button>
+        <div class="cards">
+        {% for v in veiculos %}
+            <div class="card">
+                <img src="/{{ v.imagem }}">
+                <div class="card-body">
+                    <h3>{{ v.nome }}</h3>
+                    <p class="preco">{{ v.preco | moeda }}</p>
+                    <div class="card-actions">
+                        <a href="/veiculo/{{ v.id }}" class="btn-secondary">Ver detalhes</a>
+                        <form action="/admin/excluir/{{ v.id }}" method="POST">
+                            <button onclick="return confirm('Tem certeza que deseja excluir')" class="btn-danger">Excluir</button>
                         </form>
-                    </td>
-                </tr>
-            {% endfor %}
-        </table>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+        </div>
     </body>
 </html>
 {% endblock %}
