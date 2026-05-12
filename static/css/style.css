@@ -29,6 +29,8 @@ h1 {
     flex: 1;
     display: flex;
     justify-content: flex-end;
+    align-items: center;
+    gap: 12px;
     font-weight: 500;
 }
 .nav-center a {

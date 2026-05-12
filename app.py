@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, redirect, session, flash
 from models import db, Veiculo, Agendamento, Usuario, Foto
-from datetime import datetime
+from datetime import datetime, date
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_wtf.csrf import CSRFProtect
 from flask_limiter import Limiter
@@ -32,8 +32,16 @@ EXTENSOES_PERMITIDAS = {'png', 'jpg', 'jpeg', 'webp', 'jfif'}
 def arquivo_permitido(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in EXTENSOES_PERMITIDAS
 
+
+def limpar_agendamentos_passados():
+    hoje = date.today().strftime('%Y-%m-%d')
+    Agendamento.query.filter(Agendamento.data < hoje).delete()
+    db.session.commit()
+
+
 with app.app_context():
     db.create_all()
+    limpar_agendamentos_passados()
 
     admin = Usuario.query.filter_by(email='admin@email.com').first()
 
@@ -48,6 +56,8 @@ with app.app_context():
 
         db.session.add(admin)
         db.session.commit()
+
+
 
 @app.template_filter('moeda')
 def moeda(valor):
@@ -108,6 +118,7 @@ def login():
         if usuario and check_password_hash(usuario.senha, senha):
             session['usuario_id'] = usuario.id
             session['is_admin'] = usuario.is_admin
+            session['usuario_nome'] = usuario.nome
             return redirect('/')
         else:
             flash('Email ou senha incorretos', 'erro')
@@ -222,6 +233,12 @@ def veiculo(id):
             return redirect(f'/veiculo/{id}')
         
         data = request.form['data']
+        data_obj = datetime.strptime(data, '%Y-%m-%d').date()
+
+        if data_obj < date.today():
+            flash('Não é possível agendar uma visita em uma data passada!', 'erro')
+            return redirect(f'/veiculo/{id}')
+        
         agendamento = Agendamento(
             usuario_id=session['usuario_id'],
             data=data,
@@ -239,6 +256,8 @@ def veiculo(id):
 def agendamentos():
     if not session.get('usuario_id'):
         return redirect('/login')
+    
+    limpar_agendamentos_passados()
     
     if session.get('is_admin'):
         agendamentos = Agendamento.query.all()
@@ -277,9 +296,15 @@ def editar_agendamento(id):
         return redirect('/agendamentos')
     
     if request.method == 'POST':
-        agendamento.data = request.form['data']
-        db.session.commit()
+        data = request.form['data']
+        data_obj = datetime.strptime(data, '%Y-%m-%d').date()
 
+        if data_obj < date.today():
+            flash('Não é possível agendar uma visita em uma data passada!', 'erro')
+            return redirect(f'/agendamentos/editar/{id}')
+        
+        agendamento.data = data
+        db.session.commit()
         flash('Agendamento atualizado com sucesso!', 'sucesso')
         return redirect('/agendamentos')
     
