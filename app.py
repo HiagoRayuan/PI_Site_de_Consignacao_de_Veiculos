@@ -222,6 +222,9 @@ def veiculo(id):
 
     veiculo = db.get_or_404(Veiculo, id)
 
+    HORARIOS = ['09:00','09:30', '10:00', '10:30', '11:00', '11:30', '12:00', '12:30', '13:00', 
+                '13:30', '14:00', '14:30', '15:00', '15:30', '16:00', '16:30', '17:00', '17:30']
+
     if request.method == 'POST':
         agendamento_existente = Agendamento.query.filter_by(
             usuario_id=session['usuario_id'],
@@ -233,15 +236,28 @@ def veiculo(id):
             return redirect(f'/veiculo/{id}')
         
         data = request.form['data']
+        horario = request.form['horario']
+
         data_obj = datetime.strptime(data, '%Y-%m-%d').date()
 
         if data_obj < date.today():
             flash('Não é possível agendar uma visita em uma data passada!', 'erro')
             return redirect(f'/veiculo/{id}')
         
+        horario_ocupado = Agendamento.query.filter_by(
+            veiculo_id = id,
+            data=data,
+            horario=horario
+        ).first()
+
+        if horario_ocupado:
+            flash('Este horário já está reservado para esta data!', 'erro')
+            return redirect(f'/veiculo/{id}')
+        
         agendamento = Agendamento(
             usuario_id=session['usuario_id'],
             data=data,
+            horario=horario,
             veiculo_id=id
         )
         db.session.add(agendamento)
@@ -250,7 +266,10 @@ def veiculo(id):
         flash('Agendamento realizado com sucesso!', 'sucesso')
         return redirect('/')
     
-    return render_template('veiculo.html', veiculo=veiculo)
+    agendamento_do_veiculo = Agendamento.query.filter_by(veiculo_id=id).all()
+    ocupados = [f"{a.data}_{a.horario}" for a in agendamento_do_veiculo]
+    
+    return render_template('veiculo.html', veiculo=veiculo, horarios=HORARIOS, ocupados=ocupados)
 
 @app.route('/agendamentos')
 def agendamentos():

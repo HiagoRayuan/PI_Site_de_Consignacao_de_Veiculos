@@ -21,6 +21,15 @@
                             <p><strong>Usuário:</strong> {{ a.usuario.nome }}</p>
                         {% endif %}
                         <p><strong>Data:</strong> {{ a.data | formatar_data }}</p>
+                        {% set partes = a.horario.split(':') %}
+                        {% set hora = partes[0] | int %}
+                        {% set minuto = partes[1] | int %}
+                        {% if minuto == 30 %}
+                            {% set fim = '%02d:00' | format(hora + 1) %}
+                        {% else %}
+                            {% set fim = '%02d:30' | format(hora) %}
+                        {% endif %}
+                        <p><strong>Horário:</strong> {{ a.horario }} - {{ fim }}</p>
                         <p><strong>Preço:</strong> {{a.veiculo.preco | moeda }}</p>
                         
                         <div class="card-actions">
