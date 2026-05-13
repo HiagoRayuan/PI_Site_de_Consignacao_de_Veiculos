@@ -1,7 +1,10 @@
-body{
+body {
     font-family: 'Segoe UI', Arial, sans-serif;
     background-color: #f1f2f6;
     margin: 0;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
 }
 h1 {
     color: #333;
@@ -50,6 +53,7 @@ h1 {
 }
 .container {
     padding: 30px;
+    flex: 1;
 }
 .cards {
     display: flex;
@@ -114,6 +118,12 @@ h1 {
     resize: none;
     height: 100px;
 }
+.form-group input,
+.form-group textarea,
+.form-group select {
+    box-sizing: border-box;
+    width: 100%;
+}
 .form-agendamento select {
     width: 100%;
     padding: 10px;
@@ -151,7 +161,7 @@ input[type="file"] {
     cursor: pointer;
     font-weight: bold;
     text-decoration: none;
-    display: flex;
+    display: block;
     text-align: center;
     box-sizing: border-box;
     transition: 0.2s;
