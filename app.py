@@ -1,15 +1,19 @@
-from flask import Flask, render_template, request, redirect, session, flash
-from models import db, Veiculo, Agendamento, Usuario, Foto
-from datetime import datetime, date
-from werkzeug.security import generate_password_hash, check_password_hash
+from flask import Flask, render_template, request, redirect, session, flash, url_for
 from flask_wtf.csrf import CSRFProtect
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
+from flask_mail import Mail, Message
+from itsdangerous import URLSafeTimedSerializer
+from models import db, Veiculo, Agendamento, Usuario, Foto
+from datetime import datetime, date
+from werkzeug.security import generate_password_hash, check_password_hash
 from dotenv import load_dotenv
 import os
 import uuid
 
 load_dotenv()
+print("EMAIL:", os.environ.get('MAIL_USERNAME'))
+print("SENHA:", os.environ.get('MAIL_PASSWORD'))
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY')
@@ -17,6 +21,16 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 app.config['UPLOAD_FOLDER'] = 'static/uploads'
 app.config['WTF_CSRF_ENABLED'] = True
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024 # Limita o upload para 16MB
+
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME')
+app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD')
+app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('MAIL_USERNAME')
+
+mail = Mail(app)
+serializer = URLSafeTimedSerializer(app.secret_key)
 
 csrf = CSRFProtect(app)
 
@@ -51,7 +65,8 @@ with app.app_context():
             email='admin@email.com',
             telefone='999999999',
             senha=generate_password_hash('123'),
-            is_admin=True
+            is_admin=True,
+            confirmado=True
         )
 
         db.session.add(admin)
@@ -101,10 +116,33 @@ def registro():
         db.session.add(usuario)
         db.session.commit()
 
-        flash('Cadastro realizado com sucesso!', 'sucesso')
+        # Envia email de confirmação
+        token = serializer.dumps(email, salt='confirmacao-email')
+        link = url_for('confirmar_email', token=token, _external=True)
+        msg = Message('Confirme seu email', sender=os.environ.get('MAIL_USERNAME'), recipients=[email])
+        msg.body = f'Olá {nome}! Clique no link para confirmar seu email: {link}'
+        mail.send(msg)
+
+        flash('Cadastro realizado! Verifique seu email para confirmar a conta.', 'sucesso')
         return redirect('/login')
     
     return render_template('registro.html')
+
+@app.route('/confirmar/<token>')
+def confirmar_email(token):
+    try:
+        email = serializer.loads(token, salt='confirmacao-email', max_age=3600)
+    except:
+        flash('Link de confirmação inválido ou expirado!', 'erro')
+        return redirect('/login')
+    
+    usuario = Usuario.query.filter_by(email=email).first()
+    if usuario:
+        usuario.confirmado = True
+        db.session.commit()
+        flash('Email confirmado com sucesso! Faça login.', 'sucesso')
+
+    return redirect('/login')
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -116,6 +154,9 @@ def login():
         usuario = Usuario.query.filter_by(email=email).first()
 
         if usuario and check_password_hash(usuario.senha, senha):
+            if not usuario.confirmado:
+                flash('Confirme seu email antes de fazer login!', 'erro')
+                return redirect('/login')
             session['usuario_id'] = usuario.id
             session['is_admin'] = usuario.is_admin
             session['usuario_nome'] = usuario.nome
@@ -124,7 +165,52 @@ def login():
             flash('Email ou senha incorretos', 'erro')
         
     return render_template('login.html')
+
+@app.route('/esqueci-senha', methods=['GET', 'POST'])
+def esqueci_senha():
+    if request.method == 'POST':
+        email = request.form['email']
+        usuario = Usuario.query.filter_by(email=email).first()
+
+        if usuario:
+            token = serializer.dumps(email, salt='recuperacao-senha')
+            link = url_for('redefinir_senha', token=token, _external=True)
+
+            msg = Message('Redefinição de senha', sender=os.environ.get('MAIL_USERNAME'), recipients=[email])
+            msg.body = f'Olá {usuario.nome}! Clique no link para redefinir sua senha: {link}\n\nO link expira em 1 hora.'
+            mail.send(msg)
+
+        # Sempre mostra a mesma mensagem por segurança
+        flash('Se este email estiver cadastrado, você receberá um link em breve.', 'sucesso')
+        return redirect('/login')
     
+    return render_template('esqueci_senha.html')
+
+@app.route('/redefinir_senha/<token>', methods=['GET', 'POST'])
+def redefinir_senha(token):
+    try:
+        email = serializer.loads(token, salt='recuperacao-senha', max_age=3600)
+    except:
+        flash('Link inválido ou expirado!', 'erro')
+        return redirect('/login')
+    
+    if request.method == 'POST':
+        senha = request.form['senha']
+        confirmar_senha = request.form['confirmar_senha']
+
+        if senha != confirmar_senha:
+            flash('As senhas não coincidem!', 'erro')
+            return redirect(request.url)
+        
+        usuario = Usuario.query.filter_by(email=email).first()
+        usuario.senha = generate_password_hash(senha)
+        db.session.commit()
+
+        flash('Senha redefinida com sucesso!', 'sucesso')
+        return redirect('/login')
+    
+    return render_template('redefinir_senha.html')
+
 @app.route('/logout')
 def logout():
     session.clear()

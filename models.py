@@ -9,6 +9,7 @@ class Usuario(db.Model):
     senha = db.Column(db.String(200))
     telefone = db.Column(db.String(20))
     is_admin = db.Column(db.Boolean, default=False)
+    confirmado = db.Column(db.Boolean, default=False)
 
 class Veiculo(db.Model):
     id = db.Column(db.Integer, primary_key=True)
