@@ -1,25 +1,15 @@
 {% extends 'base.html' %}
 {% block content %}
-    <!DOCTYPE html>
-    <html lang="pt-BR">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title></title>
-    </head>
-    <body>
-        <div class="form-container">
-            <h1>Alterar Agendamento</h1>
-            <p><strong>Veiculo:</strong> {{ agendamento.veiculo.nome }}</p>
-            <form method="POST">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <div class="form-group">
-                    <label>Nova data:</label>
-                    <input type="date" name="data" value="{{ agendamento.data }}" required>
-                </div>
-                <button class="btn btn-center">Salvar</button>
-            </form>
-        </div>
-    </body>
-    </html>
+    <div class="form-container">
+        <h1>Alterar Agendamento</h1>
+        <p><strong>Veiculo:</strong> {{ agendamento.veiculo.nome }}</p>
+        <form method="POST">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div class="form-group">
+                <label>Nova data:</label>
+                <input type="date" name="data" value="{{ agendamento.data }}" required>
+            </div>
+            <button class="btn btn-center">Salvar</button>
+        </form>
+    </div>
 {% endblock %}

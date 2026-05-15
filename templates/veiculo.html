@@ -1,82 +1,73 @@
 {% extends 'base.html' %}
 {% block content %}
-<!DOCTYPE html>
-    <html lang="pt-br">
-        <head>
-            <meta charset="UTF-8">
-            <title></title>
-        </head>
-        <body>
-            <div class="veiculo-container">
-                <!--Galeria-->
-                <div class="galeria">
-                    <!--Imagem Principal-->
-                    <img id="imagem-principal" src="/{{ veiculo.imagem }}" class="imagem-principal">
-                    <!--Miniaturas-->
-                    <div class="miniaturas">
-                        <img src="/{{ veiculo.imagem }}" onclick="trocarImagem(this)">
-                        {% for foto in veiculo.fotos %}
-                            <img src="/{{ foto.caminho }}" onclick="trocarImagem(this)">
-                        {% endfor %}
-                    </div>
-                </div>
-                <!--Info-->
-                <div class="info">
-                    <h1>{{ veiculo.nome }}</h1>
-                    <p class="preco">{{ veiculo.preco | moeda }}</p>
-                    <p class="descricao">{{ veiculo.descricao }}</p>
-                    <hr>
+    <div class="veiculo-container">
+        <!--Galeria-->
+        <div class="galeria">
+            <!--Imagem Principal-->
+            <img id="imagem-principal" src="/{{ veiculo.imagem }}" class="imagem-principal">
+            <!--Miniaturas-->
+            <div class="miniaturas">
+                <img src="/{{ veiculo.imagem }}" onclick="trocarImagem(this)">
+                {% for foto in veiculo.fotos %}
+                    <img src="/{{ foto.caminho }}" onclick="trocarImagem(this)">
+                {% endfor %}
+            </div>
+        </div>
+        <!--Info-->
+        <div class="info">
+            <h1>{{ veiculo.nome }}</h1>
+            <p class="preco">{{ veiculo.preco | moeda }}</p>
+            <p class="descricao">{{ veiculo.descricao }}</p>
+            <hr>
 
-                    <!--Form Agendamento-->
-                    <form method="POST" class="form-agendamento">
-                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                        <label>Escolha uma data:</label>
-                        <input type="date" name="data" id="data-agendamento" required>
+            <!--Form Agendamento-->
+            <form method="POST" class="form-agendamento">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <label>Escolha uma data:</label>
+                <input type="date" name="data" id="data-agendamento" required>
 
-                        <label>Escolha um horário:</label>
-                        <select name="horario" id="horario" required>
-                            <option value="">Selecione um horário</option>
-                            {% for h in horarios %}
-                                {% set partes = h.split(':') %}
-                                {% set hora = partes[0] | int %}
-                                {% set minuto = partes[1] | int %}
-                                {% if minuto == 30 %}
-                                    {% set fim = '%02d:00' | format(hora + 1) %}
-                                {% else %}
-                                    {% set fim = '%02d:30' | format(hora) %}
-                                {% endif %}
-                                <option value="{{ h }}">{{ h }} - {{ fim }}</option>
-                            {% endfor %}
-                        </select>
-                        <button class="btn">Agendar visita</button>
-                    </form>
-                </div>
-            </div>    
-            <script>
-                const ocupados = new Set(JSON.parse('{{ ocupados | tojson | safe }}'));
+                <label>Escolha um horário:</label>
+                <select name="horario" id="horario" required>
+                    <option value="">Selecione um horário</option>
+                    {% for h in horarios %}
+                        {% set partes = h.split(':') %}
+                        {% set hora = partes[0] | int %}
+                        {% set minuto = partes[1] | int %}
+                        {% if minuto == 30 %}
+                            {% set fim = '%02d:00' | format(hora + 1) %}
+                        {% else %}
+                            {% set fim = '%02d:30' | format(hora) %}
+                        {% endif %}
+                        <option value="{{ h }}">{{ h }} - {{ fim }}</option>
+                    {% endfor %}
+                </select>
+                <button class="btn">Agendar visita</button>
+            </form>
+        </div>
+    </div>    
+    <script>
+        const ocupados = new Set(JSON.parse('{{ ocupados | tojson | safe }}'));
 
-                document.getElementById('data-agendamento').addEventListener('change', function() {
-                    const data = this.value;
-                    const select = document.getElementById('horario');
+        document.getElementById('data-agendamento').addEventListener('change', function() {
+            const data = this.value;
+            const select = document.getElementById('horario');
 
-                    Array.from(select.options).forEach(function(option) {
-                        if (option.value === '') return;
+            Array.from(select.options).forEach(function(option) {
+                if (option.value === '') return;
 
-                        const chave = `${data}_${option.value}`;
-                        const partes = option.value.split(':');
-                        const hora = parseInt(partes[0]);
-                        const minuto = parseInt(partes[1]);
-                        const fim = minuto === 30
-                            ? `${String(hora + 1).padStart(2, '0')}:00`
-                            : `${String(hora).padStart(2, '0')}:30`;
+                const chave = `${data}_${option.value}`;
+                const partes = option.value.split(':');
+                const hora = parseInt(partes[0]);
+                const minuto = parseInt(partes[1]);
+                const fim = minuto === 30
+                    ? `${String(hora + 1).padStart(2, '0')}:00`
+                    : `${String(hora).padStart(2, '0')}:30`;
 
-                        option.disabled = ocupados.has(chave);
-                        option.text = option.disabled
-                            ? `${option.value} - ${fim} (Ocupado)`
-                            : `${option.value} - ${fim}`;
-                    });
-                });
-            </script>
-        </body>
-    </html>
+                option.disabled = ocupados.has(chave);
+                option.text = option.disabled
+                    ? `${option.value} - ${fim} (Ocupado)`
+                    : `${option.value} - ${fim}`;
+            });
+        });
+    </script>
 {% endblock %}
