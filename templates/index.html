@@ -1,28 +1,31 @@
 {% extends 'base.html' %}
-{% block content %}
-    <!DOCTYPE html>
-    <html lang="pt-br">
-        <head>
-            <meta charset="UTF-8">
-            <title></title>
-            <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css')}}">
-        </head>
-        <body>           
-            <h1>Veículos disponíveis</h1>
-            <div class="cards">
-                {% for v in veiculos %}
-                <div class="card">
-                    <img src="/{{ v.imagem }}">
-                    <div class="card-body">
-                        <h3>{{ v.nome }}</h3>
-                        <p class="preco"> {{ v.preco | moeda }}</p>
-                        <div class="card-actions">
-                            <a href="/veiculo/{{ v.id }}" class="btn">Ver detalhes</a>
-                        </div>
-                    </div>
+{% block content %}         
+    <h1>Veículos disponíveis</h1>
+    <form method="GET" action="/" class="busca-form">
+        <div class="busca-container">
+            <input type="text" name="busca" placeholder="Buscar veículo..." value="{{ busca }}">
+            <button type="submit" class="btn" style="width: auto; padding: 10px 20px;">Buscar</button>
+        </div>
+    </form>
+
+    <div class="cards">
+        {% for v in veiculos %}
+        <div class="card">
+            <img src="/{{ v.imagem }}">
+            <div class="card-body">
+                <h3>{{ v.nome }}</h3>
+                <p class="preco"> {{ v.preco | moeda }}</p>
+                <div class="card-actions">
+                    <a href="/veiculo/{{ v.id }}" class="btn">Ver detalhes</a>
                 </div>
-                {% endfor %}
             </div>
-        </body>
-    </html>
+        </div>
+        {% else %}
+            {% if busca: %}
+                <p>Nenhum {{ busca }} encontrado.</p>
+            {% else %}
+                <p>Nenhum veículo encontrado.</p>
+            {% endif %}
+        {% endfor %}
+    </div>
 {% endblock %}

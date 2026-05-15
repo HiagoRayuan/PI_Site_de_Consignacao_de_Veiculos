@@ -51,6 +51,28 @@ h1 {
 .btn-nav:hover {
     background: #74b9ff;
 }
+.busca-form {
+    margin-bottom: 24px;
+}
+.busca-container {
+    display: flex;
+    gap: 10px;
+    max-width: 500px;
+}
+.busca-container input {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    outline: none;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    font-size: 15px;
+    box-sizing: border-box;
+    transition: 0.2s;
+}
+.busca-container input:focus {
+    border-color: #0984e3;
+}
 .container {
     padding: 30px;
     flex: 1;
@@ -78,6 +100,15 @@ h1 {
 }
 .card-body {
     padding: 15px;
+}
+.card-admin {
+    width: 280px;
+    border: 1px solid #e0e0e0;
+}
+.card-admin:hover {
+    transform: scale(1.03);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    border-color: #0984e3;
 }
 .preco {
     color: green;

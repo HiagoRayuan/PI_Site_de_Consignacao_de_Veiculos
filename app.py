@@ -87,9 +87,17 @@ def formatar_data(data):
 def home():
     usuario = None
     if session.get('usuario_id'):
-        usuario = Usuario.query.get(session['usuario_id'])
-    veiculos = Veiculo.query.all()
-    return render_template('index.html', veiculos=veiculos, usuario=usuario)
+        usuario = db.session.get(Usuario, session['usuario_id'])
+
+    busca = request.args.get('busca', '')
+    if busca:
+        veiculos = Veiculo.query.filter(
+            Veiculo.nome.ilike(f'%{busca}%') |
+            Veiculo.descricao.ilike(f'%{busca}%')
+        ).all()
+    else:
+        veiculos = Veiculo.query.all()
+    return render_template('index.html', veiculos=veiculos, usuario=usuario, busca=busca)
 
 @app.route('/registro', methods=['GET', 'POST'])
 def registro():
@@ -250,6 +258,56 @@ def excluir_veiculo(id):
     db.session.commit()
 
     return redirect('/admin/veiculos')
+
+@app.route('/admin/usuarios')
+def admin_usuarios():
+    if not session.get('is_admin'):
+        return redirect('/')
+    
+    busca = request.args.get('busca', '')
+    if busca:
+        usuarios = Usuario.query.filter(
+            Usuario.nome.ilike(f'%{busca}%') |
+            Usuario.email.ilike(f'%{busca}%') 
+        ).all()
+    else:
+        usuarios = Usuario.query.all()
+
+    return render_template('admin/usuarios.html', usuarios=usuarios, busca=busca)
+
+@app.route('/admin/usuarios/excluir/<int:id>', methods=['POST'])
+def excluir_usuario(id):
+    if not session.get('is_admin'):
+        return redirect('/')
+    
+    usuario = db.session.get(Usuario, id)
+
+    if usuario.is_admin:
+        flash('Não é possível excluir um administrador!', 'erro')
+        return redirect('/admin/usuarios')
+    
+    db.session.delete(usuario)
+    db.session.commit()
+
+    flash('Usuário excluído com sucesso!', 'sucesso')
+    return redirect('/admin/usuarios')
+
+@app.route('/admin/usuarios/toggle-admin/<int:id>', methods=['POST'])
+def toggle_admin(id):
+    if not session.get('is_admin'):
+        return redirect('/')
+    
+    usuario = db.session.get(Usuario, id)
+
+    if usuario.id == session['usuario_id']:
+        flash('Você não pode alterar seu próprio status de admin!', 'erro')
+        return redirect('/admin/usuarios')
+    
+    usuario.is_admin = not usuario.is_admin
+    db.session.commit()
+
+    flash('Permissões do usuário atualizadas!', 'sucesso')
+    return redirect('/admin/usuarios')
 
 @app.route('/cadastrar', methods=['GET', 'POST'])
 def cadastrar():
