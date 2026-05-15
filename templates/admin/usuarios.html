@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block content %}
+    <h1>Gerenciar Usuários</h1>
+
+    <form method="GET" action="/admin/usuarios" class="busca-form">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="busca-container">
+            <input type="text" name="busca" placeholder="Buscar por nome ou email...">
+            <button type="submit" class="btn" style="width: auto; padding: 10px 20px;">Buscar</button>
+        </div>
+    </form>
+
+    <div class="cards">
+        {% for u in usuarios %}
+            <div class="card card-admin">
+                <div class="card-body">
+                    <h3>{{ u.nome }}</h3>
+                    <p><strong>Email:</strong> {{ u.email }}</p>
+                    <p><strong>Telefone:</strong> {{ u.telefone }}</p>
+                    <p><strong>Confirmado:</strong> {% if u.confirmado %}✅{% else %}❌{% endif %}</p>
+                    <p><strong>Admin:</strong>  {% if u.is_admin %}✅{% else %}❌{% endif %}</p>
+
+                    <div class="card-actions">
+                        {% if not u.is_admin or u.id != session['usuario_id'] %}
+                            <form action="/admin/usuarios/toggle-admin/{{ u.id }}" method="POST">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <button class="btn-secondary">
+                                    {% if u.is_admin %}Remover Admin{% else %}Tornar Admin{% endif %}
+                                </button>
+                            </form>
+                        {% endif %}
+
+                        {% if not u.is_admin %}
+                            <form action="/admin/usuarios/excluir/{{ u.id }}" method="POST">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                <button onclick="return confirm('Deseja excluir este usuário?')" class="btn-danger">Excluir</button>
+                            </form>
+                        {% endif %}
+                    </div>
+                </div> 
+            </div>
+        {% else %}
+            <p>Nenhum usuário encontrado.</p>
+        {% endfor %}
+    </div>
+{% endblock %}
