@@ -79,17 +79,19 @@ h1 {
     flex: 1;
 }
 .cards {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
     gap: 20px;
+    align-items: stretch;
 }
 .card {
     background: white;
-    width: 250px;
     border-radius: 10px;
     overflow: hidden;
     box-shadow: 0 0 10px rgba(0,0,0,0.1);
     transition: 0.3s;
+    display: flex;
+    flex-direction: column;
 }
 .card:hover {
     transform: scale(1.03);
@@ -101,6 +103,16 @@ h1 {
 }
 .card-body {
     padding: 15px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+.card-body h3 {
+    flex: 1;
+    margin: 0 0 8px 0;
+}
+.card-body .preco {
+    margin: 0 0 12px 0;
 }
 .card-admin {
     width: 280px;
@@ -281,10 +293,7 @@ input[type="file"] {
     background: #74b9ff;
 }
 .card-actions {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    margin-top: 12px;
+    margin-top: auto;
 }
 .link {
     text-align: center;
