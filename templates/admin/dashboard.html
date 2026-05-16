@@ -2,31 +2,31 @@
 {% block content %}
     <h1>Painel Administrativo</h1>
     <div class="cards">
-        <div class="card">
+        <a href="/admin/veiculos" class="card card-admin card-link">                 
             <div class="card-body">
+                <div class="card-icon">🚗</div> 
                 <h3>Veículos</h3>
-                <p class="preco">{{ veiculos }}</p>
+                <p class="card-numero">{{ veiculos }}</p>
+                <p class="card-label">cadastrados</p>
             </div>
-        </div>
+        </a>
 
-        <div class="card">
+        <a href="/agendamentos" class="card card-admin card-link">
             <div class="card-body">
+                <div class="card-icon">📅</div>
                 <h3>Agendamentos</h3>
-                <p class="preco">{{ agendamentos }}</p>
+                <p class="card-numero">{{ agendamentos }}</p>
+                <p class="card-label">ativos</p>
             </div>
-        </div>
-
-        <div class="card">
+        </a>
+        
+        <a href="/admin/usuarios" class="card card-admin card-link">
             <div class="card-body">
+                <div class="card-icon">👥</div>
                 <h3>Usuários</h3>
-                <p class="preco">{{ usuarios }}</p>
+                <p class="card-numero">{{ usuarios }}</p>
+                <p class="card-label">cadastrados</p>
             </div>
-        </div>
-    </div>
-    <div style="margin-top: 20px; display: flex; gap: 12px;">
-        <a href="/admin/veiculos" class="btn-card">Gerenciar veículos</a>
-        <a href="/agendamentos" class="btn-card">Ver agendamentos</a>
-        <a href="/admin/usuarios" class="btn-card">GErenciar Usuários</a>
-        <a href="/cadastrar" class="btn-card">Cadastrar Veículo</a>
+        </a>
     </div>
 {% endblock %}
